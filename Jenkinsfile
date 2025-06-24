@@ -15,6 +15,29 @@ pipeline {
   }
 
   stages {
+    stage('Install Git & Terraform') {
+      steps {
+        script {
+          sh '''
+            echo "Installing Git and Terraform..."
+            if ! command -v git &> /dev/null; then
+              sudo apt-get update -y
+              sudo apt-get install git -y
+            fi
+
+            if ! command -v terraform &> /dev/null; then
+              sudo apt-get update -y
+              sudo apt-get install -y wget unzip
+              wget https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip
+              unzip terraform_1.7.5_linux_amd64.zip
+              sudo mv terraform /usr/local/bin/
+              terraform -version
+            fi
+          '''
+        }
+      }
+    }
+
     stage('Checkout Code') {
       steps {
         git 'https://github.com/samient/azure-avd-terraform'
