@@ -13,9 +13,7 @@ pipeline {
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
-  options {
-    skipDefaultCheckout() // Skip default checkout to avoid conflicts with the git step
-  }
+ 
     stage('Checkout Code') {
       steps {
         git 'https://github.com/samient/azure-avd-terraform'
