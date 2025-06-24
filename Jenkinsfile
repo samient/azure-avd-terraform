@@ -13,31 +13,9 @@ pipeline {
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
-
-  stages {
-    stage('Install Git & Terraform') {
-      steps {
-        script {
-          sh '''
-            echo "Installing Git and Terraform..."
-            if ! command -v git &> /dev/null; then
-              apt-get update -y
-              apt-get install git -y
-            fi
-
-            if ! command -v terraform &> /dev/null; then
-              apt-get update -y
-              apt-get install -y wget unzip
-              wget https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip
-              unzip terraform_1.7.5_linux_amd64.zip
-              mv terraform /usr/local/bin/
-              terraform -version
-            fi
-          '''
-        }
-      }
-    }
-
+  options {
+    skipDefaultCheckout() // Skip default checkout to avoid conflicts with the git step
+  }
     stage('Checkout Code') {
       steps {
         git 'https://github.com/samient/azure-avd-terraform'
