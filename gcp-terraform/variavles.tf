@@ -24,7 +24,7 @@ variable "location" {
   description = "Azure region"
 }
 
-variable "project" {
+variable "project_id" {
   type        = string
   default     = "avdproj"
   description = "Project name prefix"
