@@ -1,10 +1,5 @@
 pipeline {
-  agent {
-    docker {
-      image 'yourdockerhubuser/jenkins-terraform-azure:1.0'
-      args  '-u root'
-    }
-  }
+  agent any
 
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
@@ -17,9 +12,31 @@ pipeline {
     ARM_CLIENT_SECRET    = credentials('AZURE_CLIENT_SECRET')
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
+    TERRAFORM_VERSION    = '1.7.5'
   }
 
   stages {
+    stage('Install Terraform') {
+      steps {
+        sh '''
+          echo "[INFO] Installing Terraform $TERRAFORM_VERSION"
+          apt-get update && apt-get install -y wget unzip
+          cd /tmp
+          wget https://releases.hashicorp.com/terraform/$TERRAFORM_VERSION/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+          unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+          chmod +x terraform
+          mv terraform /usr/local/bin/
+          terraform -version
+        '''
+      }
+    }
+
+    stage('Checkout Code') {
+      steps {
+        git url: 'https://github.com/samient/azure-avd-terraform.git', credentialsId: 'github-creds'
+      }
+    }
+
     stage('Set Project Prefix') {
       steps {
         sh '''
@@ -65,7 +82,7 @@ pipeline {
 
   post {
     failure {
-      echo "Terraform ${params.ACTION} failed!"
+      echo "❌ Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
     }
   }
 }
