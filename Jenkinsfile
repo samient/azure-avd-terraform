@@ -56,7 +56,7 @@ pipeline {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
           cd gcp-terraform
-          terraform plan -var="project_id=${GCP_PROJECT}" -var-file=variables.tf
+          terraform plan -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
     }
@@ -69,7 +69,7 @@ pipeline {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
           cd gcp-terraform
-          terraform apply -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=variables.tf
+          terraform apply -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
     }
@@ -82,7 +82,7 @@ pipeline {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
           cd gcp-terraform
-          terraform destroy -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=variables.tf
+          terraform destroy -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
     }
