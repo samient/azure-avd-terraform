@@ -1,5 +1,9 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'alpine/git' // Or any image that includes git
+    }
+  }
 
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
@@ -13,6 +17,26 @@ pipeline {
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
+
+  stages {
+    stage('Install Terraform Locally') {
+      steps {
+        sh '''
+          mkdir -p $LOCAL_BIN
+          export PATH=$LOCAL_BIN:$PATH
+
+          if ! [ -x "$LOCAL_BIN/terraform" ]; then
+            echo "Installing Terraform locally to $LOCAL_BIN"
+            curl -fsSL https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip -o terraform.zip
+            unzip -o terraform.zip
+            mv terraform $LOCAL_BIN/
+            chmod +x $LOCAL_BIN/terraform
+          fi
+
+          terraform version
+        '''
+      }
+    }
 
   stages {
     stage('Checkout Code') {
