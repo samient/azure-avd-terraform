@@ -1,21 +1,21 @@
 variable "client_id" {
   type        = string
-  description = "Azure client ID"
+  description = "AZURE_CLIENT_ID"
 }
 
 variable "client_secret" {
   type        = string
-  description = "Azure client secret"
+  description = "AZURE_CLIENT_SECRET"
 }
 
 variable "tenant_id" {
   type        = string
-  description = "Azure tenant ID"
+  description = "AZURE_TENANT_ID"
 }
 
 variable "subscription_id" {
   type        = string
-  description = "Azure subscription ID"
+  description = "AZURE_SUBSCRIPTION_ID"
 }
 
 variable "location" {
