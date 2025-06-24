@@ -1,6 +1,14 @@
 pipeline {
   agent any
 
+  parameters {
+    choice(
+      name: 'ACTION',
+      choices: ['apply', 'destroy'],
+      description: 'Choose whether to apply or destroy the infrastructure'
+    )
+  }
+
   environment {
     ARM_CLIENT_ID        = credentials('AZURE_CLIENT_ID')
     ARM_CLIENT_SECRET    = credentials('AZURE_CLIENT_SECRET')
@@ -11,7 +19,7 @@ pipeline {
   stages {
     stage('Checkout Code') {
       steps {
-        git 'https://github.com/samient/azure-avd-terraform.git'
+        git 'https://github.com/<your-org>/azure-avd-terraform.git'
       }
     }
 
@@ -23,21 +31,34 @@ pipeline {
 
     stage('Plan Infrastructure') {
       steps {
-        sh 'terraform plan -var-file=terraform.tfvars'
+        script {
+          if (params.ACTION == 'apply') {
+            sh 'terraform plan -var-file=terraform.tfvars'
+          } else {
+            sh 'terraform plan -destroy -var-file=terraform.tfvars'
+          }
+        }
       }
     }
 
-    stage('Apply Infrastructure') {
+    stage('Execute Terraform') {
       steps {
-        input message: "Proceed with Apply?"
-        sh 'terraform apply -auto-approve -var-file=terraform.tfvars'
+        script {
+          if (params.ACTION == 'apply') {
+            input message: "Proceed with APPLY?"
+            sh 'terraform apply -auto-approve -var-file=terraform.tfvars'
+          } else {
+            input message: "Proceed with DESTROY?"
+            sh 'terraform destroy -auto-approve -var-file=terraform.tfvars'
+          }
+        }
       }
     }
   }
 
   post {
     failure {
-      echo "Terraform apply failed!"
+      echo "Terraform ${params.ACTION} failed!"
     }
   }
 }
