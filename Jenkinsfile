@@ -16,7 +16,7 @@ pipeline {
  
     stage('Checkout Code') {
       steps {
-        git 'https://github.com/samient/azure-avd-terraform'
+        git 'https://github.com/samient/azure-avd-terraform.git'
       }
     }
 
@@ -68,4 +68,3 @@ pipeline {
       echo "Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
     }
   }
-}
