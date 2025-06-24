@@ -51,4 +51,3 @@ pipeline {
       echo "Terraform ${params.ACTION} failed!"
     }
   }
-}
