@@ -42,7 +42,7 @@ pipeline {
       steps {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
-          cd gcp-terraform
+          cd azure-terraform
           terraform init
         '''
       }
@@ -55,7 +55,7 @@ pipeline {
       steps {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
-          cd gcp-terraform
+          cd azure-terraform
           terraform plan -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
@@ -68,7 +68,7 @@ pipeline {
       steps {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
-          cd gcp-terraform
+          cd azure-terraform
           terraform apply -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
@@ -81,7 +81,7 @@ pipeline {
       steps {
         sh '''
           export PATH="$LOCAL_BIN:$PATH"
-          cd gcp-terraform
+          cd azure-terraform
           terraform destroy -auto-approve -var="project_id=${GCP_PROJECT}" -var-file=terraform.tfvars
         '''
       }
