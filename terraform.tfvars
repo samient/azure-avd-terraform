@@ -1,0 +1,5 @@
+client_id        = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+client_secret    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+tenant_id        = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+subscription_id  = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+admin_password   = "YourSecurePassword123!"
