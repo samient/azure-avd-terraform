@@ -12,9 +12,29 @@ pipeline {
     ARM_CLIENT_SECRET    = credentials('AZURE_CLIENT_SECRET')
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
+    TERRAFORM_VERSION    = '1.7.5'
+    PATH                 = "/usr/local/bin:$PATH"
   }
 
   stages {
+    stage('Install Terraform') {
+      steps {
+        sh '''
+          echo "Installing Terraform ${TERRAFORM_VERSION}..."
+          if ! command -v terraform >/dev/null; then
+            cd /tmp
+            wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+            chmod +x terraform
+            mv terraform /usr/local/bin/
+          else
+            echo "Terraform already installed"
+          fi
+          terraform -version
+        '''
+      }
+    }
+
     stage('Set Project Prefix') {
       steps {
         script {
