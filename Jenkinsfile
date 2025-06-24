@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'hashicorp/terraform:1.7.5'
+      args '-u root' // Run as root (if needed)
+    }
+  }
 
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
@@ -12,25 +17,9 @@ pipeline {
     ARM_CLIENT_SECRET    = credentials('AZURE_CLIENT_SECRET')
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
-    TERRAFORM_VERSION    = '1.7.5'
   }
 
   stages {
-    stage('Install Terraform') {
-      steps {
-        sh '''
-          echo "[INFO] Installing Terraform $TERRAFORM_VERSION"
-          apt-get update && apt-get install -y wget unzip
-          cd /tmp
-          wget https://releases.hashicorp.com/terraform/$TERRAFORM_VERSION/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-          unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-          chmod +x terraform
-          mv terraform /usr/local/bin/
-          terraform -version
-        '''
-      }
-    }
-
     stage('Checkout Code') {
       steps {
         git url: 'https://github.com/samient/azure-avd-terraform.git', credentialsId: 'github-creds'
@@ -55,11 +44,10 @@ pipeline {
       steps {
         script {
           def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
-          if (params.ACTION == 'apply') {
-            sh "terraform plan -var-file=${tfvarsFile}"
-          } else {
-            sh "terraform plan -destroy -var-file=${tfvarsFile}"
-          }
+          def planCommand = params.ACTION == 'apply' 
+              ? "terraform plan -var-file=${tfvarsFile}" 
+              : "terraform plan -destroy -var-file=${tfvarsFile}"
+          sh planCommand
         }
       }
     }
