@@ -13,7 +13,8 @@ pipeline {
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
- 
+
+  stages {
     stage('Checkout Code') {
       steps {
         git 'https://github.com/samient/azure-avd-terraform.git'
@@ -47,7 +48,7 @@ pipeline {
       }
     }
 
-    stage('Terraform ${params.ACTION}') {
+    stage("Terraform ${params.ACTION}") {
       steps {
         script {
           def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
@@ -68,3 +69,4 @@ pipeline {
       echo "Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
     }
   }
+}
