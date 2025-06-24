@@ -1,14 +1,12 @@
 pipeline {
-  agent {
-    docker {
-      image 'alpine/git' // Or any image that includes git
-    }
-  }
+  agent any
 
   parameters {
-    choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
-    choice(name: 'ENVIRONMENT', choices: ['dev'], description: 'Select environment')
-    string(name: 'PROJECT_NAME', defaultValue: 'avdproj', description: 'Project name prefix')
+    choice(
+      name: 'ACTION',
+      choices: ['apply', 'destroy'],
+      description: 'Choose whether to apply or destroy the infrastructure'
+    )
   }
 
   environment {
@@ -19,69 +17,39 @@ pipeline {
   }
 
   stages {
-    stage('Install Terraform Locally') {
-      steps {
-        sh '''
-          mkdir -p $LOCAL_BIN
-          export PATH=$LOCAL_BIN:$PATH
-
-          if ! [ -x "$LOCAL_BIN/terraform" ]; then
-            echo "Installing Terraform locally to $LOCAL_BIN"
-            curl -fsSL https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip -o terraform.zip
-            unzip -o terraform.zip
-            mv terraform $LOCAL_BIN/
-            chmod +x $LOCAL_BIN/terraform
-          fi
-
-          terraform version
-        '''
-      }
-    }
-
-  stages {
     stage('Checkout Code') {
       steps {
-        git 'https://github.com/samient/azure-avd-terraform.git'
+        git 'https://github.com/<your-org>/azure-avd-terraform.git'
       }
     }
 
-    stage('Set Project Prefix') {
-      steps {
-        script {
-          sh "echo 'project = \"${params.PROJECT_NAME}-${params.ENVIRONMENT}\"' > override.auto.tfvars"
-        }
-      }
-    }
-
-    stage('Terraform Init') {
+    stage('Init Terraform') {
       steps {
         sh 'terraform init'
       }
     }
 
-    stage('Terraform Plan') {
+    stage('Plan Infrastructure') {
       steps {
         script {
-          def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
           if (params.ACTION == 'apply') {
-            sh "terraform plan -var-file=${tfvarsFile}"
+            sh 'terraform plan -var-file=terraform.tfvars'
           } else {
-            sh "terraform plan -destroy -var-file=${tfvarsFile}"
+            sh 'terraform plan -destroy -var-file=terraform.tfvars'
           }
         }
       }
     }
 
-    stage('Terraform Execute') {
+    stage('Execute Terraform') {
       steps {
         script {
-          def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
           if (params.ACTION == 'apply') {
-            input message: "Proceed with APPLY to ${params.ENVIRONMENT}?"
-            sh "terraform apply -auto-approve -var-file=${tfvarsFile}"
+            input message: "Proceed with APPLY?"
+            sh 'terraform apply -auto-approve -var-file=terraform.tfvars'
           } else {
-            input message: "Proceed with DESTROY from ${params.ENVIRONMENT}?"
-            sh "terraform destroy -auto-approve -var-file=${tfvarsFile}"
+            input message: "Proceed with DESTROY?"
+            sh 'terraform destroy -auto-approve -var-file=terraform.tfvars'
           }
         }
       }
@@ -90,7 +58,7 @@ pipeline {
 
   post {
     failure {
-      echo "Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
+      echo "Terraform ${params.ACTION} failed!"
     }
   }
 }
