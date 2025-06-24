@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'yourdockerhubuser/jenkins-terraform-azure:1.0'
+      args  '-u root'
+    }
+  }
 
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
@@ -12,35 +17,14 @@ pipeline {
     ARM_CLIENT_SECRET    = credentials('AZURE_CLIENT_SECRET')
     ARM_SUBSCRIPTION_ID  = credentials('AZURE_SUBSCRIPTION_ID')
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
-    TERRAFORM_VERSION    = '1.7.5'
-    PATH                 = "/usr/local/bin:$PATH"
   }
 
   stages {
-    stage('Install Terraform Locally') {
-      steps {
-        sh '''
-          mkdir -p $LOCAL_BIN
-          export PATH=$LOCAL_BIN:$PATH
-
-          if ! [ -x "$LOCAL_BIN/terraform" ]; then
-            echo "Installing Terraform locally to $LOCAL_BIN"
-            curl -fsSL https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip -o terraform.zip
-            unzip -o terraform.zip
-            mv terraform $LOCAL_BIN/
-            chmod +x $LOCAL_BIN/terraform
-          fi
-
-          terraform version
-        '''
-      }
-    }
-
     stage('Set Project Prefix') {
       steps {
-        script {
-          sh "echo 'project = \"${params.PROJECT_NAME}-${params.ENVIRONMENT}\"' > override.auto.tfvars"
-        }
+        sh '''
+          echo "project = \\"${PROJECT_NAME}-${ENVIRONMENT}\\"" > override.auto.tfvars
+        '''
       }
     }
 
@@ -68,10 +52,10 @@ pipeline {
         script {
           def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
           if (params.ACTION == 'apply') {
-            input message: "Proceed with APPLY to ${params.ENVIRONMENT}?"
+            input message: "Proceed with APPLY?"
             sh "terraform apply -auto-approve -var-file=${tfvarsFile}"
           } else {
-            input message: "Proceed with DESTROY from ${params.ENVIRONMENT}?"
+            input message: "Proceed with DESTROY?"
             sh "terraform destroy -auto-approve -var-file=${tfvarsFile}"
           }
         }
@@ -81,7 +65,7 @@ pipeline {
 
   post {
     failure {
-      echo "Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
+      echo "Terraform ${params.ACTION} failed!"
     }
   }
 }
