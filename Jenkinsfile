@@ -14,13 +14,6 @@ pipeline {
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
 
-  stages {
-    stage('Checkout Code') {
-      steps {
-        git 'https://github.com/samient/azure-avd-terraform.git'
-      }
-    }
-
     stage('Set Project Prefix') {
       steps {
         script {
