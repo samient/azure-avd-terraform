@@ -11,7 +11,7 @@ pipeline {
   stages {
     stage('Checkout Code') {
       steps {
-        git 'https://github.com/<your-org>/azure-avd-terraform.git'
+        git 'https://github.com/samient/azure-avd-terraform.git'
       }
     }
 
