@@ -2,8 +2,9 @@ pipeline {
   agent any
 
   parameters {
-    choice( name: 'ACTION', choices: ['apply', 'destroy'],  description: 'Choose whether to apply or destroy'
-    )
+    choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
+    choice(name: 'ENVIRONMENT', choices: ['dev'], description: 'Select environment')
+    string(name: 'PROJECT_NAME', defaultValue: 'avdproj', description: 'Project name prefix')
   }
 
   environment {
@@ -13,19 +14,29 @@ pipeline {
     ARM_TENANT_ID        = credentials('AZURE_TENANT_ID')
   }
 
-    stage('Init Terraform') {
+  stages {
+    stage('Set Project Prefix') {
+      steps {
+        script {
+          sh "echo 'project = \"${params.PROJECT_NAME}-${params.ENVIRONMENT}\"' > override.auto.tfvars"
+        }
+      }
+    }
+
+    stage('Terraform Init') {
       steps {
         sh 'terraform init'
       }
     }
 
-    stage('Plan Infrastructure') {
+    stage('Terraform Plan') {
       steps {
         script {
+          def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
           if (params.ACTION == 'apply') {
-            sh 'terraform plan -var-file=terraform.tfvars'
+            sh "terraform plan -var-file=${tfvarsFile}"
           } else {
-            sh 'terraform plan -destroy -var-file=terraform.tfvars'
+            sh "terraform plan -destroy -var-file=${tfvarsFile}"
           }
         }
       }
@@ -34,12 +45,13 @@ pipeline {
     stage('Execute Terraform') {
       steps {
         script {
+          def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
           if (params.ACTION == 'apply') {
-            input message: "Proceed with APPLY?"
-            sh 'terraform apply -auto-approve -var-file=terraform.tfvars'
+            input message: "Proceed with APPLY to ${params.ENVIRONMENT}?"
+            sh "terraform apply -auto-approve -var-file=${tfvarsFile}"
           } else {
-            input message: "Proceed with DESTROY?"
-            sh 'terraform destroy -auto-approve -var-file=terraform.tfvars'
+            input message: "Proceed with DESTROY from ${params.ENVIRONMENT}?"
+            sh "terraform destroy -auto-approve -var-file=${tfvarsFile}"
           }
         }
       }
@@ -48,6 +60,7 @@ pipeline {
 
   post {
     failure {
-      echo "Terraform ${params.ACTION} failed!"
+      echo "Terraform ${params.ACTION} failed for ${params.ENVIRONMENT}!"
     }
   }
+}
