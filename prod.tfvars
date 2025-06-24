@@ -1,3 +1,3 @@
 admin_password = "ProdAdminPass123!"
 location       = "West Europe"
-vm_count       = 3
+vm_count       = 2
