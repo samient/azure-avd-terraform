@@ -48,7 +48,7 @@ pipeline {
       }
     }
 
-    stage("Terraform ${params.ACTION}") {
+    stage('Terraform Execute') {
       steps {
         script {
           def tfvarsFile = "${params.ENVIRONMENT}.tfvars"
