@@ -3,7 +3,7 @@ pipeline {
 
   parameters {
     choice(name: 'ACTION', choices: ['apply', 'destroy'], description: 'Choose action to perform')
-    choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select environment')
+    choice(name: 'ENVIRONMENT', choices: ['dev'], description: 'Select environment')
     string(name: 'PROJECT_NAME', defaultValue: 'avdproj', description: 'Project name prefix')
   }
 
