@@ -1,5 +1,0 @@
-clientId: "cb822ebf-4a6f-4b3e-ade8-ef9be1b398cf"
-clientSecret: "lzT8Q~YfvZn5vTzhICkrTh~TE8~20co-5H-hicCb"
-subscriptionId: "4bcee4f8-c7d8-4f7d-b516-7a3620080356"
-tenantId: "aa1995c3-8e3b-4c60-932e-a84a881812d8"
-admin_password   = "YourSecurePassword123!"
