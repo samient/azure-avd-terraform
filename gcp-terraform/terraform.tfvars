@@ -1,5 +1,1 @@
-clientId: "AZURE_CLIENT_ID"
-clientSecret: "AZURE_CLIENT_SECRET"
-subscriptionId: "AZURE_SUBSCRIPTION_ID"
-tenantId: "AZURE_TENANT_ID"
 admin_password   = "YourSecurePassword123!"
